@@ -82,7 +82,7 @@ class BooleanFormulaTree:
 				out += ")"
 			else:
 				# Must be a terminal
-				out += self.tree[index] + " "
+				out += self.tree[index]
 		else:
 			print "Tried to exceed array bounds"
 
