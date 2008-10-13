@@ -14,7 +14,7 @@ class TreeProgram(representation.BooleanFormulaTree):
 			return False
 	
 	def _SubEvaluate(self, input_string, index):
-		if index <= self.max_size:
+		if index <= self.max_index:
 			if self.tree[index] == 'A':
 				if self._SubEvaluate(input_string, 2*index+1) and self._SubEvaluate(input_string, 2*index+2):
 					return True
@@ -33,8 +33,10 @@ class TreeProgram(representation.BooleanFormulaTree):
 			else:
 				if input_string[int(self.tree[index])] == 1:
 					return True
-				else:
+				elif input_string[int(self.tree[index])] == 0:
 					return False
+				else:
+					print >>sys.stderr, "Invalid tree element: `%s'" % input_string[int(self.tree[index])]
 
 	def PrintTree(self):
 		"""Traverses the tree and prints its structure to the screen"""

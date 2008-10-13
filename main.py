@@ -6,6 +6,7 @@ tally = 0
 count = 0
 max_fit = 0
 min_fit = 1
+evaluator = evaluation.MultiplexerEvaluator()
 for x in range(1,10):
 	prog = program.TreeProgram()
 	prog.RaiseTree()
@@ -26,7 +27,6 @@ for x in range(1,10):
 	#print "CrossOver'd tree:"
 	#print "\t" + prog.ToString()
 
-	evaluator = evaluation.MultiplexerEvaluator()
 	program_fitness = evaluator.Evaluate(prog)
 	print "[Run %i]: %s" % (x, str(program_fitness))
 	tally += program_fitness
