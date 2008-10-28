@@ -5,14 +5,15 @@ import sets
 class BooleanFormulaTree:
 	"""A individual represented by a Boolean Formula Tree"""
 
-	def __init__(self, free_vars, max_depth=5):
+	def __init__(self, free_vars, max_depth=8):
 		"""We use a dictionary for storage in this representation"""
 		self.tree = []
 		self.free_vars = free_vars
+		self.select_vars = int(math.log(self.free_vars, 2))
 		self.max_depth = max_depth
 		self.max_index = int(math.pow(2, max_depth)) - 1
 		# Initialize a vector of choices
-		self.choices = [ str(i) for i in range(0, self.free_vars) ]
+		self.choices = [ str(i) for i in range(0, self.free_vars + self.select_vars) ]
 		# Include non-terminals
 		self.choices.append('A')
 		self.choices.append('O')
@@ -105,10 +106,15 @@ class BooleanFormulaTree:
 				r = random.randint(0, len(self.tree)-1)
 				self.tree[r] = random.choice(self.choices)
 
-	def CrossOver(self, other_prog):
-		"""Performs a crossover of this program with the program taken
-		as a parameter.  Does a basic check to ensure that the max_depth
-		property of this program is not violated."""
+	def CrossOver(self, other_prog, xo_prob):
+		"""Performs a crossover of this program with the program and a
+		probability taken as parameters.  Does a basic check to ensure
+		that the max_depth property of this program is not violated."""
+
+		# Skip the crossover with probability (1 - xo_prob)
+		if random.random() >= xo_prob:
+			return
+
 		xover_pt = 0
 		while True:
 			# Find the indices of valid (i.e., not '-1') entities in both 
@@ -141,6 +147,6 @@ class BooleanFormulaTree:
 				else:
 					# TODO: Need to do something better here.  Verify
 					# the tree depth before doing crossover?
-					self.tree[next_point] = random.choice(['0','1','2'])
+					self.tree[next_point] = random.choice(range(0, self.free_vars + self.select_vars))
 		
 		# TODO: Check that we're not going to violate max_depth

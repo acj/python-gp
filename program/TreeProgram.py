@@ -4,7 +4,7 @@ class TreeProgram(representation.BooleanFormulaTree):
 	"""A representation of GP programs that uses a tree structure."""
 
 	def __init__(self):
-		representation.BooleanFormulaTree.__init__(self, 2)
+		representation.BooleanFormulaTree.__init__(self, 4)
 		pass
 
 	def Evaluate(self, input_string):
