@@ -5,7 +5,7 @@ import sets
 class BooleanFormulaTree:
 	"""A individual represented by a Boolean Formula Tree"""
 
-	def __init__(self, free_vars, max_depth=8):
+	def __init__(self, free_vars, max_depth=10):
 		"""We use a dictionary for storage in this representation"""
 		self.tree = []
 		self.free_vars = free_vars
@@ -31,7 +31,7 @@ class BooleanFormulaTree:
 		terminals `0', `1', ..., `N-1', where N is the number of free variables 
 		in the Boolean equation."""
 		index = 0
-		self.tree = [ '-1' for i in range(0, self.max_index + 1) ]
+		self.tree = [ '#' for i in range(0, self.max_index + 1) ]
 		self.RaiseSubTree(index)
 	
 	def RaiseSubTree(self, index):
@@ -64,7 +64,7 @@ class BooleanFormulaTree:
 			print "Tried to raise a subtree past the array bounds"
 		
 	def ToString(self, index=0, out=""):
-		if index <= self.max_index and self.tree[index] != '-1': 
+		if index <= self.max_index and self.tree[index] != '#': 
 			if self.tree[index] == 'A':
 				out += "(AND "
 				out += self.ToString(2*index+1)
@@ -82,9 +82,9 @@ class BooleanFormulaTree:
 			else:
 				# Must be a terminal
 				out += self.tree[index]
-		elif index <= self.max_index and self.tree[index] == '-1':
-			print "Read a `-1' at index %i (parent is `%s' at index %i)" % (index, self.tree[int(math.floor((index-1)/2))], (index-1)/2)
-			out += "-1"
+		elif index <= self.max_index and self.tree[index] == '#':
+			print "Read a `#' at index %i (parent is `%s' at index %i)" % (index, self.tree[int(math.floor((index-1)/2))], (index-1)/2)
+			out += "#"
 		else:
 			print "Tried to exceed array bounds: %i" % index
 			out += "[OOB]"
@@ -101,10 +101,22 @@ class BooleanFormulaTree:
 		should occur.  Currently, we allow mutations to unused parts of
 		the tree and do not prune unreachable branches that occur as a
 		result of mutation."""
+		r = 0
 		for i in range(1, num_mutations+1):
 			if random.random() < mut_prob:
-				r = random.randint(0, len(self.tree)-1)
-				self.tree[r] = random.choice(self.choices)
+				while True:
+					r = random.randint(0, len(self.tree)-1)
+					if self.tree[r] != '#':
+						break
+
+				# Do a sanity check on the arity of the node that we're
+				# replacing.
+				if self.tree[r] in ['A', 'O']: 
+					self.tree[r] = random.choice(['A', 'O'])
+				elif self.tree[r] == 'N':
+					pass
+				else:
+					self.tree[r] = str(random.choice(range(0, self.free_vars + self.select_vars)))
 
 	def CrossOver(self, other_prog, xo_prob):
 		"""Performs a crossover of this program with the program and a
@@ -115,38 +127,51 @@ class BooleanFormulaTree:
 		if random.random() >= xo_prob:
 			return
 
-		xover_pt = 0
+		# Find the indices of valid (i.e., not '#') entities in both 
+		# trees.  Compute the intersection of these two sets.  Choose 
+		# one set member at random to be the crossover point.
+		eligible_points_tree1 = list(index for index,item in enumerate(self.tree) if item != '#')
+		eligible_points_tree2 = list(index for index,item in enumerate(other_prog.tree) if item != '#')
+
+		set_tree1 = sets.Set(eligible_points_tree1)
+		set_tree2 = sets.Set(eligible_points_tree2)
+		eligible_points = set_tree1.intersection(set_tree2)
+
+		eligible_points_list = list(eligible_points)
+
+		xover_pt_self = None
+		xover_pt_other = None
+		# Create a strong bias (90%) for functions over leaves
 		while True:
-			# Find the indices of valid (i.e., not '-1') entities in both 
-			# trees.  Compute the intersection of these two sets.  Choose 
-			# one set member at random to be the crossover point.
-			eligible_points_tree1 = list(index for index,item in enumerate(self.tree) if item != '-1')
-			eligible_points_tree2 = list(index for index,item in enumerate(other_prog.tree) if item != '-1')
-
-			set_tree1 = sets.Set(eligible_points_tree1)
-			set_tree2 = sets.Set(eligible_points_tree2)
-			eligible_points = set_tree1.intersection(set_tree2)
-
-			eligible_points_list = list(eligible_points)
-			xover_pt = random.choice(eligible_points_list)
-			if xover_pt > len(other_prog.tree):
-				# Too high for the other tree's size; try again
-				continue
+			xover_pt_self = random.choice(eligible_points_list)
+			if self.tree[xover_pt_self] not in ['A', 'O', 'N']:
+				if random.random() < 0.1:
+					break
+			else:
+				break
+		while True:
+			xover_pt_other = random.choice(eligible_points_list)
+			if other_prog.tree[xover_pt_other] not in ['A', 'O', 'N']:
+				if random.random() < 0.1:
+					break
 			else:
 				break
 
-		point_stack = [xover_pt]
+		point_stack = [xover_pt_other]
+		# Mind the index offset between the two trees
+		xover_diff = xover_pt_self - xover_pt_other
+
 		while len(point_stack) > 0:
 			next_point = point_stack.pop()
-			# Stopping case: reading a '-1'
-			if other_prog.tree[next_point] != '-1':
-				if (2*next_point + 2) <= self.max_index:
-					self.tree[next_point] = other_prog.tree[next_point]
+			# Stopping case: reading a '#'
+			if other_prog.tree[next_point] != '#':
+				if ((2 * next_point + 2) + xover_diff) <= self.max_index and ((2 * next_point + 2) <= other_prog.max_index):
+					self.tree[next_point + xover_diff] = other_prog.tree[next_point]
 					point_stack.append(2*next_point + 1)
 					point_stack.append(2*next_point + 2)
 				else:
 					# TODO: Need to do something better here.  Verify
 					# the tree depth before doing crossover?
-					self.tree[next_point] = random.choice(range(0, self.free_vars + self.select_vars))
+					self.tree[next_point + xover_diff] = str(random.choice(range(0, self.free_vars + self.select_vars)))
 		
 		# TODO: Check that we're not going to violate max_depth

@@ -1,2 +1,3 @@
 from Evaluator import Evaluator
 from MultiplexerEvaluator import MultiplexerEvaluator
+from CPPMuxEvaluator import CPPMuxEvaluator

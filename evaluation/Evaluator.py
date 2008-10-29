@@ -4,5 +4,5 @@ class Evaluator:
 	def __init__(self):
 		pass
 
-	def ComputeFitness(self, p):
+	def Evaluate(self, p):
 		pass

@@ -27,7 +27,7 @@ class Population:
 		total_fitness = 0.0
 		for ndx in range(0, len(self.pop)):
 			prog = self.pop[ndx]
-			if prog.tree == []:
+			if len(prog.tree) == 0:
 				prog.RaiseTree()
 			self.fitness_grid[ndx] = self.evaluator.Evaluate(prog)
 			if self.fitness_grid[ndx] > self.best_fitness[1]:
@@ -70,17 +70,20 @@ class Population:
 			prog2 = self.pop[len(self.pop)-1]
 
 		# Mutation...
-		for ndx in range(0, len(self.pop)):
-			self.pop[ndx].Mutate(1, 0.1)
+		if random.random() < 0.1:
+			rand_org = random.choice(self.pop)
+			rand_org.Mutate(1, 1.0)
 		
 		# Crossover...
 		prog_child = self.program_class()
 		prog_child.tree = list(prog1.tree) # Shallow list copy
-		prog_child.CrossOver(prog2, 0.4)
+		prog_child.CrossOver(prog2, 0.2)
 
 		# If crossover had an effect, let's insert the child
 		if prog_child.tree != prog1.tree:
-			new_child_index = random.randint(1, len(self.pop) - 1)
+			#new_child_index = random.randint(1, len(self.pop) - 1)
+			#self.pop[new_child_index] = prog_child
+			new_child_index = sorted_grid[1]
 			self.pop[new_child_index] = prog_child
 
 			child_fit = self.evaluator.Evaluate(prog_child)
@@ -101,5 +104,5 @@ class Population:
 		#(prog1_fit, prog2_fit) = (self.fitness_grid[sorted_grid[1]], self.fitness_grid[sorted_grid[-2]])
 		#print "XO: %f + %f = %f (Delta: %f)" % (prog1_fit, prog2_fit, child_fit, child_fit - max(prog1_fit, prog2_fit))
 
-		print "Best of run: (%i, %f)" %  self.best_fitness
-		print "Average: %f" % self.average_fitness
+		#print "Best of run: (%i, %f)" %  self.best_fitness
+		#print "Average: %f" % self.average_fitness

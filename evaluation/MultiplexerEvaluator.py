@@ -105,7 +105,12 @@ class MultiplexerEvaluator(Evaluator.Evaluator):
 	def Evaluate6mux(self, program):
 		correct_count = 0
 		for input in self.mux6_tt:
-			if program.Evaluate(input[0:6]) == input[6]:
+			result = program.Evaluate(input[0:6])
+			if result == input[6]:
 				correct_count += 1
+			elif result == None:
+				# Invalid tree - return a fitness of 0.0
+				#print "*** INVALID TREE ***"
+				return 0.0	
 
 		return (float(correct_count)/len(self.mux6_tt))
