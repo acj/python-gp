@@ -43,62 +43,53 @@ class Population:
 		# This constructs a sorted List (INDICES ONLY) of fitnesses in
 		# ascending order.
 		sorted_grid = list(index for index, item in sorted(enumerate(self.fitness_grid), key=lambda item: item[1]))
+		fit_total = sum(self.fitness_grid)
 
-		# Selection...
-		prog1 = None
-		prog2 = None
+		# Selection
+		new_pop = []
+		while len(new_pop) < len(self.pop):
+			n = random.uniform(0, fit_total)
+			for ndx in range(1, len(self.pop) - 1):
+				if n < self.fitness_grid[ndx]:
+					new_pop.append(self.pop[ndx])
+					break
+				n = n - self.fitness_grid[ndx]
+		
+		self.pop = new_pop
+
 		# Select a random organism weighted by fitness (better fitness
 		# increases probability of selection)
-		fit_total = sum(self.fitness_grid)
-		n = random.uniform(0, fit_total)
-		for ndx in range(1, len(self.pop) - 1):
-			if n < self.fitness_grid[ndx]:
-				prog1 = self.pop[ndx]
-				break
-			n = n - self.fitness_grid[ndx]
-		if prog1 == None:
-			prog1 = self.pop[0]
+		prog1 = random.choice(self.pop)
 
 		# Same selection process again
-		n = random.uniform(0, fit_total)
-		for ndx in range(1, len(self.pop) - 1):
-			if n < self.fitness_grid[ndx]:
-				prog2 = self.pop[ndx]
-				break
-			n = n - self.fitness_grid[ndx]
-		if prog2 == None:
-			prog2 = self.pop[len(self.pop)-1]
+		prog2 = random.choice(self.pop)	
 
-		# Mutation...
-		if random.random() < 0.1:
-			rand_org = random.choice(self.pop)
-			rand_org.Mutate(1, 1.0)
-		
+		#print "First tree: %s" % prog1.tree
 		# Crossover...
 		prog_child = self.program_class()
 		prog_child.tree = list(prog1.tree) # Shallow list copy
-		prog_child.CrossOver(prog2, 0.2)
+		prog_child.CrossOver(prog2, 0.0)
+		#print "Second tree: %s" % prog2.tree
+
+		#print "---"
+		#print "New tree: %s" % prog_child.tree
 
 		# If crossover had an effect, let's insert the child
 		if prog_child.tree != prog1.tree:
-			#new_child_index = random.randint(1, len(self.pop) - 1)
-			#self.pop[new_child_index] = prog_child
-			new_child_index = sorted_grid[1]
+			new_child_index = random.randint(1, len(self.pop) - 1)
 			self.pop[new_child_index] = prog_child
+			#new_child_index = sorted_grid[1]
+			#self.pop[new_child_index] = prog_child
+			
+		# Mutation...
+		for mut_org in self.pop:
+			mut_org.Mutate(1, 0.05)
 
-			child_fit = self.evaluator.Evaluate(prog_child)
-			self.fitness_grid[new_child_index] = child_fit
+		# Re-evaluate the new (crossed-over) fitness against the best fitness
+		child_fit = self.evaluator.Evaluate(prog_child)
+		if child_fit > self.best_fitness[1]:
+			self.best_fitness = (sorted_grid[-1], child_fit)
 
-			# If this program was the best before it got crossed over, then
-			# we need to give the crown to the second-best program
-			# TODO: Fix this to work again
-			#if self.best_fitness[0] == sorted_grid[-1]:
-			#	self.best_fitness = (sorted_grid[-2], self.fitness_grid[sorted_grid[-2]])
-
-			# Re-evaluate the new (crossed-over) fitness against the best fitness
-			self.fitness_grid[sorted_grid[-1]] = child_fit
-			if child_fit > self.best_fitness[1]:
-				self.best_fitness = (sorted_grid[-1], child_fit)
 
 		# TODO: Export this data in CSV (or similar) format
 		#(prog1_fit, prog2_fit) = (self.fitness_grid[sorted_grid[1]], self.fitness_grid[sorted_grid[-2]])
