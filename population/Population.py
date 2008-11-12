@@ -3,20 +3,21 @@ import random
 class Population:
 	"""A standard GP population"""
 
-	def __init__(self, pop_size, program_class, evaluator_class):
+	def __init__(self, pop_size, problem_instance):
 		self.pop = []
 		self.fitness_grid = []
 		self.average_fitness = 0.0
 		self.best_fitness = (-1, 0)
-		self.program_class = program_class # Save for making children
+		self.problem = problem_instance
 		idx = 0
 		while idx < pop_size:
-			self.pop.append(program_class())
+			self.pop.append(self.problem.GetNewProgramInstance())
+			self.pop[idx].RaiseTree()
 			self.fitness_grid.append(0.0)
 			idx += 1
 
 		# Get an evaluator instance to use
-		self.evaluator = evaluator_class()
+		self.evaluator = self.problem.GetEvaluator()
 
 	def DoStep(self):
 		"""Perform an evolutionary step.  `Execute' each program,
@@ -66,9 +67,9 @@ class Population:
 
 		#print "First tree: %s" % prog1.tree
 		# Crossover...
-		prog_child = self.program_class()
+		prog_child = self.problem.GetNewProgramInstance()
 		prog_child.tree = list(prog1.tree) # Shallow list copy
-		prog_child.CrossOver(prog2, 0.0)
+		prog_child.CrossOver(prog2, 0.4)
 		#print "Second tree: %s" % prog2.tree
 
 		#print "---"
@@ -89,11 +90,3 @@ class Population:
 		child_fit = self.evaluator.Evaluate(prog_child)
 		if child_fit > self.best_fitness[1]:
 			self.best_fitness = (sorted_grid[-1], child_fit)
-
-
-		# TODO: Export this data in CSV (or similar) format
-		#(prog1_fit, prog2_fit) = (self.fitness_grid[sorted_grid[1]], self.fitness_grid[sorted_grid[-2]])
-		#print "XO: %f + %f = %f (Delta: %f)" % (prog1_fit, prog2_fit, child_fit, child_fit - max(prog1_fit, prog2_fit))
-
-		#print "Best of run: (%i, %f)" %  self.best_fitness
-		#print "Average: %f" % self.average_fitness

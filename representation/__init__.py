@@ -1,1 +1,3 @@
-from BooleanFormulaTree import BooleanFormulaTree
+from Tree import Tree
+from TreeNodeSet import TreeNodeSet
+from TreeNode import TreeNode

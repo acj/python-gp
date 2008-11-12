@@ -1,7 +1,7 @@
-import Evaluator
+import evaluation
 import math
 
-class MultiplexerEvaluator(Evaluator.Evaluator):
+class MultiplexerEvaluator(evaluation.Evaluator):
 	"""Multiplexer evaluator"""
 
 	def __init__(self):
@@ -86,26 +86,12 @@ class MultiplexerEvaluator(Evaluator.Evaluator):
 	def Evaluate(self, program):
 		"""Evaluate the given program against a known-correct
 		Multiplexer.  For this, we utilize published truth tables."""
-		if program.free_vars == 2:
-			return self.Evaluate3mux(program)
-		elif program.free_vars == 4:
-			return self.Evaluate6mux(program)
-		else:
-			print >>sys.stderr, "Number of free variables must be 2 or 4"
-			sys.exit(1)
-
-	def Evaluate3mux(self, program):
-		correct_count = 0
-		for input in self.mux3_tt:
-			if program.Evaluate(input[0:3]) == input[3]:
-				correct_count += 1
-
-		return (float(correct_count)/len(self.mux3_tt))
+		return self.Evaluate6mux(program)
 
 	def Evaluate6mux(self, program):
 		correct_count = 0
 		for input in self.mux6_tt:
-			result = program.Evaluate(input[0:6])
+			result = self.EvaluateProgramInstance(program, input[0:6])
 			if result == input[6]:
 				correct_count += 1
 			elif result == None:
@@ -114,3 +100,62 @@ class MultiplexerEvaluator(Evaluator.Evaluator):
 				return 0.0	
 
 		return (float(correct_count)/len(self.mux6_tt))
+	
+	def EvaluateProgramInstance(self, program, input_string):
+		"""Evaluate the given input string using this tree-based program.
+		If the input string matches, return True; else, return False.  We
+		return None if the tree is deemed to be invalid."""
+		if program.tree_is_invalid:
+			return None
+
+		if self._SubEvaluate(program, input_string, 0):
+			return True
+		else:
+			return False
+	
+	def _SubEvaluate(self, program, input_string, index):
+		if index <= program.max_index:
+			# AND
+			if program.tree[index].GetValue() == 'A':
+				if program.tree[2*index+1] == '#' or program.tree[2*index+2] == '#':
+					program.tree_is_invalid = True
+					return False
+				if self._SubEvaluate(program, input_string, 2*index+1) and self._SubEvaluate(program, input_string, 2*index+2):
+					return True
+				else:
+					return False
+			# OR
+			elif program.tree[index].GetValue() == 'O':
+				if program.tree[2*index+1] == '#' or program.tree[2*index+2] == '#':
+					program.tree_is_invalid = True
+					return False
+				if self._SubEvaluate(program, input_string, 2*index+1) or self._SubEvaluate(program, input_string, 2*index+2):
+					return True
+				else:
+					return False
+			# NOT
+			elif program.tree[index].GetValue() == 'N':
+				if program.tree[2*index+1] == '#':
+					program.tree_is_invalid = True
+					return False
+				if not self._SubEvaluate(program, input_string, 2*index+1):
+					return True
+				else:
+					return False
+			# Boolean-valued variables
+			elif program.tree[index].GetValue() in ['0','1','2','3','4','5']:
+				if input_string[int(program.tree[index].GetValue())] == 1:
+					return True
+				elif input_string[int(program.tree[index].GetValue())] == 0:
+					return False
+				else:
+					print >>sys.stderr, "Invalid tree element: `%s'" % input_string[int(program.tree[index])]
+					program.tree_is_invalid = True
+					return False
+			else:
+				print "Bad tree node value: %s" % str(program.tree[index].GetValue())
+				exit(0)
+
+	def PrintTree(self):
+		"""Traverses the tree and prints its structure to the screen"""
+		pass

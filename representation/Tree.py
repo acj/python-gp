@@ -2,22 +2,20 @@ import math
 import random
 import sets
 
-class BooleanFormulaTree:
-	"""A individual represented by a Boolean Formula Tree"""
+class Tree:
+	"""A representation for a tree-based organism"""
 
-	def __init__(self, free_vars, max_depth=10):
+	def __init__(self, max_depth, nodeset):
 		"""We use a dictionary for storage in this representation"""
 		self.tree = []
-		self.free_vars = free_vars
-		self.select_vars = int(math.log(self.free_vars, 2))
+		#self.free_vars = free_vars
+		#self.select_vars = int(math.log(self.free_vars, 2))
 		self.max_depth = max_depth
 		self.max_index = int(math.pow(2, max_depth)) - 1
-		# Initialize a vector of choices
-		self.choices = [ str(i) for i in range(0, self.free_vars + self.select_vars) ]
-		# Include non-terminals
-		self.choices.append('A')
-		self.choices.append('O')
-		self.choices.append('N')
+		self.tree_is_invalid = False
+
+		# Initialize a vector of node choices
+		self.nodeset = nodeset
 
 	def GetMaxDepth(self):
 		return self.max_depth
@@ -32,24 +30,20 @@ class BooleanFormulaTree:
 		in the Boolean equation."""
 		index = 0
 		self.tree = [ '#' for i in range(0, self.max_index + 1) ]
-		self.RaiseSubTree(index)
+		self.tree[0] = random.choice(self.nodeset.GetNonterminals())
+		self.RaiseSubTree(2*index+1)
+		self.RaiseSubTree(2*index+2)
 	
 	def RaiseSubTree(self, index):
 		if index <= self.max_index:
-			r = random.randint(0, len(self.choices)-1)
-			if self.choices[r] == 'A' and (2*index+2) <= self.max_index:
+			r = random.randint(0, len(self.nodeset.nodes)-1)
+			if self.nodeset.nodes[r].GetArity() == 2 and (2*index+2) <= self.max_index:
 				# Use AND
-				self.tree[index] = 'A'
+				self.tree[index] = self.nodeset.nodes[r]
 				self.RaiseSubTree(2*index + 1)
 				self.RaiseSubTree(2*index + 2)
-			elif self.choices[r] == 'O' and (2*index+2) <= self.max_index:
-				# Use OR
-				self.tree[index] = 'O'
-				self.RaiseSubTree(2*index + 1)
-				self.RaiseSubTree(2*index + 2)
-			elif self.choices[r] == 'N' and (2*index+2) <= self.max_index:
-				# Use NOT
-				self.tree[index] = 'N'
+			elif self.nodeset.nodes[r].GetArity() == 1 and (2*index+2) <= self.max_index:
+				self.tree[index] = self.nodeset.nodes[r]
 				self.RaiseSubTree(2*index + 1)
 			else:
 				# Must be a terminal - remember to convert to string.  If we
@@ -57,37 +51,26 @@ class BooleanFormulaTree:
 				# then we need to pick a new random terminal.  Otherwise, use
 				# the terminal that is already selected.
 				if (2*index+2) > self.max_index:
-					self.tree[index] = self.choices[random.randint(0, self.free_vars-1)]
+					self.tree[index] = random.choice(self.nodeset.GetTerminals())
 				else:
-					self.tree[index] = self.choices[r]
+					self.tree[index] = self.nodeset.nodes[r]
 		else:
 			print "Tried to raise a subtree past the array bounds"
 		
 	def ToString(self, index=0, out=""):
 		if index <= self.max_index and self.tree[index] != '#': 
-			if self.tree[index] == 'A':
-				out += "(AND "
+			if self.tree[index].GetArity() == 2:
+				out += "(" + self.tree[index].GetName() + " "
 				out += self.ToString(2*index+1)
 				out += self.ToString(2*index+2)
 				out += ")"
-			elif self.tree[index] == 'O':
-				out += "(OR "
-				out += self.ToString(2*index+1)
-				out += self.ToString(2*index+2)
-				out += ")"
-			elif self.tree[index] == 'N':
-				out += "(NOT "
+			elif self.tree[index].GetArity() == 1:
+				out += "(" + self.tree[index].GetName() + " "
 				out += self.ToString(2*index+1)
 				out += ")"
 			else:
 				# Must be a terminal
-				out += self.tree[index]
-		elif index <= self.max_index and self.tree[index] == '#':
-			print "Read a `#' at index %i (parent is `%s' at index %i)" % (index, self.tree[int(math.floor((index-1)/2))], (index-1)/2)
-			out += "#"
-		else:
-			print "Tried to exceed array bounds: %i" % index
-			out += "[OOB]"
+				out += self.tree[index].GetName()
 
 		return out
 		
@@ -97,26 +80,26 @@ class BooleanFormulaTree:
 	
 	def Mutate(self, num_mutations, mut_prob):
 		"""Perform mutation on the tree according to the given
-		parameters (number of mutations and the probability that mutation
-		should occur.  Currently, we allow mutations to unused parts of
-		the tree and do not prune unreachable branches that occur as a
-		result of mutation."""
+		parameters (number of mutations and the probability that
+		mutation should occur.	Currently, we do not prune unreachable
+		branches that occur as a result of mutation."""
+
 		r = 0
 		for i in range(1, num_mutations+1):
 			if random.random() < mut_prob:
 				while True:
 					r = random.randint(0, len(self.tree)-1)
 					if self.tree[r] != '#':
-						break
+						# Do a sanity check on the arity of the node that we're
+						# replacing.
+						if self.tree[r].IsTerminal(): 
+							self.tree[r] = random.choice(self.nodeset.GetTerminals())
+						else:
+							# Preserve node arity
+							self.tree[r] = random.choice(self.nodeset.GetNodesByArity(self.tree[r].GetArity()))
 
-				# Do a sanity check on the arity of the node that we're
-				# replacing.
-				if self.tree[r] in ['A', 'O']: 
-					self.tree[r] = random.choice(['A', 'O'])
-				elif self.tree[r] == 'N':
-					pass
-				else:
-					self.tree[r] = str(random.choice(range(0, self.free_vars + self.select_vars)))
+						# Exit the loop - we mutated a node
+						break
 
 	def CrossOver(self, other_prog, xo_prob):
 		"""Performs a crossover of this program with the program and a
@@ -144,14 +127,16 @@ class BooleanFormulaTree:
 		# Create a strong bias (90%) for functions over leaves
 		while True:
 			xover_pt_self = random.choice(eligible_points_list)
-			if self.tree[xover_pt_self] not in ['A', 'O', 'N']:
+			#print "First point: %d" % xover_pt_self
+			if self.tree[xover_pt_self] not in self.nodeset.GetNonterminals():
 				if random.random() < 0.1:
 					break
 			else:
 				break
 		while True:
 			xover_pt_other = random.choice(eligible_points_list)
-			if other_prog.tree[xover_pt_other] not in ['A', 'O', 'N']:
+			#print "Second point: %d" % xover_pt_self
+			if other_prog.tree[xover_pt_other] not in self.nodeset.GetNonterminals():
 				if random.random() < 0.1:
 					break
 			else:
@@ -172,6 +157,6 @@ class BooleanFormulaTree:
 				else:
 					# TODO: Need to do something better here.  Verify
 					# the tree depth before doing crossover?
-					self.tree[next_point + xover_diff] = str(random.choice(range(0, self.free_vars + self.select_vars)))
+					self.tree[next_point + xover_diff] = str(random.choice(self.nodeset.GetTerminals()))
 		
 		# TODO: Check that we're not going to violate max_depth

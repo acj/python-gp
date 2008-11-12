@@ -1,7 +1,7 @@
-import Evaluator
+import evaluation
 import hybridgp
 
-class CPPMuxEvaluator(Evaluator.Evaluator):
+class CPPMuxEvaluator(evaluation.Evaluator):
 	
 	def __init__(self):
 		self.evaltree = hybridgp.EvalTree()
