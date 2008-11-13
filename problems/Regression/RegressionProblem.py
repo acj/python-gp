@@ -1,11 +1,11 @@
-import MultiplexerNodes
+import RegressionNodes
 import representation
 
-class MultiplexerProblem:
+class RegressionProblem:
 	def __init__(self, eval_instance):
 		self.ev = eval_instance
-		self.nodeset = MultiplexerNodes.MultiplexerNodes()
-		self.tree_depth = 8 
+		self.nodeset = RegressionNodes.RegressionNodes()
+		self.tree_depth = 6
 	
 	def GetEvaluator(self):
 		return self.ev
@@ -15,6 +15,6 @@ class MultiplexerProblem:
 	
 	def GetNewProgramInstance(self):
 		return representation.Tree(self.tree_depth, self.nodeset)
-	
+
 	def IsMaximizationProblem(self):
-		return True
+		return False

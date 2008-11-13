@@ -115,8 +115,9 @@ class MultiplexerEvaluator(evaluation.Evaluator):
 	
 	def _SubEvaluate(self, program, input_string, index):
 		if index <= program.max_index:
+			node_value = program.tree[index].GetValue()
 			# AND
-			if program.tree[index].GetValue() == 'A':
+			if node_value == 'A':
 				if program.tree[2*index+1] == '#' or program.tree[2*index+2] == '#':
 					program.tree_is_invalid = True
 					return False
@@ -125,7 +126,7 @@ class MultiplexerEvaluator(evaluation.Evaluator):
 				else:
 					return False
 			# OR
-			elif program.tree[index].GetValue() == 'O':
+			elif node_value == 'O':
 				if program.tree[2*index+1] == '#' or program.tree[2*index+2] == '#':
 					program.tree_is_invalid = True
 					return False
@@ -134,7 +135,7 @@ class MultiplexerEvaluator(evaluation.Evaluator):
 				else:
 					return False
 			# NOT
-			elif program.tree[index].GetValue() == 'N':
+			elif node_value == 'N':
 				if program.tree[2*index+1] == '#':
 					program.tree_is_invalid = True
 					return False
@@ -143,10 +144,10 @@ class MultiplexerEvaluator(evaluation.Evaluator):
 				else:
 					return False
 			# Boolean-valued variables
-			elif program.tree[index].GetValue() in ['0','1','2','3','4','5']:
-				if input_string[int(program.tree[index].GetValue())] == 1:
+			elif node_value in ['0','1','2','3','4','5']:
+				if input_string[int(node_value)] == 1:
 					return True
-				elif input_string[int(program.tree[index].GetValue())] == 0:
+				elif input_string[int(node_value)] == 0:
 					return False
 				else:
 					print >>sys.stderr, "Invalid tree element: `%s'" % input_string[int(program.tree[index])]

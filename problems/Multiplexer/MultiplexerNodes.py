@@ -3,7 +3,7 @@ import representation
 class AndNode(representation.TreeNode):
 	def __init__(self):
 		# General properties
-		self.name = "AND"
+		self.name = "AndNode()"
 		self.terminal = False
 		self.arity = 2
 		self.value = "A"
@@ -11,7 +11,7 @@ class AndNode(representation.TreeNode):
 class OrNode(representation.TreeNode):
 	def __init__(self):
 		# General properties
-		self.name = "OR"
+		self.name = "OrNode()"
 		self.terminal = False
 		self.arity = 2
 		self.value = "O"
@@ -19,7 +19,7 @@ class OrNode(representation.TreeNode):
 class NotNode(representation.TreeNode):
 	def __init__(self):
 		# General properties
-		self.name = "NOT"
+		self.name = "NotNode()"
 		self.terminal = False
 		self.arity = 1 
 		self.value = "N"
@@ -27,7 +27,7 @@ class NotNode(representation.TreeNode):
 class IntegerNode(representation.TreeNode):
 	def __init__(self, value):
 		# General properties
-		self.name = "Int(" + str(value) + ")"
+		self.name = "IntegerNode(" + str(value) + ")"
 		self.terminal = True
 		self.arity = 0
 		self.value = str(value)
