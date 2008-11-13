@@ -79,13 +79,14 @@ class Population:
 						# Minimization problem
 						tournament_best = (n, prog_fit)
 
-			new_pop.append(self.pop[tournament_best[0]])
+			tourn_prog.tree = list(self.pop[tournament_best[0]].tree)
+			new_pop.append(tourn_prog)
 
-		prog1 = None
-		prog2 = None
+		prog1 = self.problem.GetNewProgramInstance()
+		prog2 = self.problem.GetNewProgramInstance()
 		while len(new_pop) < len(self.pop):
-			prog1 = new_pop[random.randint(0,len(new_pop)-1)]
-			prog2 = new_pop[random.randint(0,len(new_pop)-1)]
+			prog1.tree = list(new_pop[random.randint(0,len(new_pop)-1)].tree)
+			prog2.tree = list(new_pop[random.randint(0,len(new_pop)-1)].tree)
 
 			if prog1.tree != [] and prog2.tree != [] and random.random() < xover_prob:
 				prog1.CrossOver(prog2)
