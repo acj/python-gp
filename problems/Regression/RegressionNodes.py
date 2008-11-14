@@ -35,7 +35,7 @@ class DivideNode(representation.TreeNode):
 class VariableNode(representation.TreeNode):
 	def __init__(self):
 		# General properties
-		self.name = "VariableNode"
+		self.name = "VariableNode()"
 		self.terminal = True
 		self.arity = 0
 		self.value = "x"
@@ -50,8 +50,8 @@ class IntegerNode(representation.TreeNode):
 
 class RegressionNodes(representation.TreeNodeSet):
 	def __init__(self):
-		self.nodes = [PlusNode(), MinusNode(), MultiplyNode(),
-		DivideNode(), VariableNode(), 
+		self.nodes = [PlusNode(), MinusNode(), MultiplyNode(), VariableNode(), 
+		#DivideNode(), 
 		#IntegerNode(-5.0),
 		#IntegerNode(-4.0), IntegerNode(-3.0), IntegerNode(-2.0),
 		IntegerNode(-1.0), IntegerNode(0.0), IntegerNode(1.0),

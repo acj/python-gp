@@ -4,8 +4,9 @@ import representation
 class RegressionProblem:
 	def __init__(self, eval_instance):
 		self.ev = eval_instance
+		self.ideal_fitness = 0.0
 		self.nodeset = RegressionNodes.RegressionNodes()
-		self.tree_depth = 4
+		self.tree_depth = 2
 	
 	def GetEvaluator(self):
 		return self.ev

@@ -4,6 +4,7 @@ import representation
 class MultiplexerProblem:
 	def __init__(self, eval_instance):
 		self.ev = eval_instance
+		self.ideal_fitness = 1.0
 		self.nodeset = MultiplexerNodes.MultiplexerNodes()
 		self.tree_depth = 8 
 	

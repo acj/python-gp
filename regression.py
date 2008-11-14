@@ -5,15 +5,11 @@ import population
 
 ev = problems.Regression.RegressionEvaluator()
 problem = problems.Regression.RegressionProblem(ev)
-pop = population.Population(100, problem)
+pop = population.Population(1000, problem, 0.60, 0.10, 0.30)
 
 # Set up counters
-tally = 0
-count = 0
-max_fit = 0
-min_fit = 1
 update_count = 0
-best_of_run = (0, 1000.0, '')
+best_of_run = (0, 10000000.0, '')
 
 try:
 	while pop.best_fitness[1] > 0.0:
@@ -22,12 +18,11 @@ try:
 		if pop.best_fitness[1] < best_of_run[1]:
 			best_of_run = (pop.best_fitness[0], pop.best_fitness[1], pop.pop[pop.best_fitness[0]].Pickle())
 		if update_count % 1 == 0:
-			print "Best of generation #%i: (%i, %f); average fitness = %f" % (update_count, pop.best_fitness[0], pop.best_fitness[1], pop.average_fitness)
+			print "Best of generation #%i: (%i, %f); avg fitness = %f" % (update_count, pop.best_fitness[0], pop.best_fitness[1], pop.average_fitness)
 			#print pop.pop[pop.best_fitness[0]].Pickle()
-		if pop.best_fitness[1] == 0.0:
-			print "Resulting tree (index %i, fitness %i) after %i generations:" % (pop.best_fitness[0], pop.best_fitness[1], update_count)
-			print "\t%s" % pop.pop[pop.best_fitness[0]].ToString()
-			print "\t%s" % pop.pop[pop.best_fitness[0]].Pickle()
+	
+	# If we reach an ideal individual, simulate an interrupt
+	raise KeyboardInterrupt
 except KeyboardInterrupt:
 	print "---"
 	print "Best of run: %d, %f, %s" % best_of_run

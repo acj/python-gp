@@ -67,17 +67,35 @@ class Tree:
 			return "()"
 		if index <= self.max_index and self.tree[index] != '#': 
 			if self.tree[index].GetArity() == 2:
-				out += "(" + self.tree[index].GetName() + " "
+				out += "(" + self.tree[index].GetValue() + " "
+				if index != 0:
+					out += "\n"
+					for n in range(0, int(math.ceil(math.log(2*index+1, 2))) + 1):
+						out += "  "
+				else:
+					out += "\n  "
 				out += self.ToString(2*index+1)
+				if index != 0:
+					out += "\n"
+					for n in range(0, int(math.ceil(math.log(2*index+2, 2))) + 1):
+						out += "  "
+				else:
+					out += "\n  "
 				out += self.ToString(2*index+2)
 				out += ")"
 			elif self.tree[index].GetArity() == 1:
-				out += "(" + self.tree[index].GetName() + " "
+				out += "(" + self.tree[index].GetValue() + " "
+				if index != 0:
+					out += "\n"
+					for n in range(0, int(math.ceil(math.log(2*index+1, 2))) + 1):
+						out += "  "
+				else:
+					out += "\n  "
 				out += self.ToString(2*index+1)
 				out += ")"
 			else:
 				# Must be a terminal
-				out += self.tree[index].GetName()
+				out += self.tree[index].GetValue() + " "
 
 		return out
 		
@@ -93,8 +111,7 @@ class Tree:
 	def Mutate(self, num_mutations, mut_prob):
 		"""Perform mutation on the tree according to the given
 		parameters (number of mutations and the probability that
-		mutation should occur.	Currently, we do not prune unreachable
-		branches that occur as a result of mutation."""
+		mutation should occur."""
 
 		r = 0
 		for i in range(1, num_mutations+1):
@@ -113,43 +130,43 @@ class Tree:
 						# Exit the loop - we mutated a node
 						break
 
-	def CrossOver(self, other_prog):
+	def CrossOver(self, other_prog, xover_pt=None):
 		"""Performs a crossover of this program with the another
 		program taken as a parameter.  Does a basic check to
 		ensure that the max_depth property of this program is
 		not violated."""
 
-		# Find the indices of valid (i.e., not '#') entities in both 
-		# trees.  Compute the intersection of these two sets.  Choose 
-		# one set member at random to be the crossover point.
-		eligible_points_tree1 = list(index for index,item in enumerate(self.tree) if item != '#')
-		eligible_points_tree2 = list(index for index,item in enumerate(other_prog.tree) if item != '#')
+		if xover_pt == None:
+			# Find the indices of valid (i.e., not '#') entities in both 
+			# trees.  Compute the intersection of these two sets.  Choose 
+			# one set member at random to be the crossover point.
+			eligible_points_tree1 = list(index for index,item in enumerate(self.tree) if item != '#')
+			eligible_points_tree2 = list(index for index,item in enumerate(other_prog.tree) if item != '#')
 
-		set_tree1 = sets.Set(eligible_points_tree1)
-		set_tree2 = sets.Set(eligible_points_tree2)
-		eligible_points = set_tree1.intersection(set_tree2)
+			set_tree1 = sets.Set(eligible_points_tree1)
+			set_tree2 = sets.Set(eligible_points_tree2)
+			eligible_points = set_tree1.intersection(set_tree2)
 
-		eligible_points_list = list(eligible_points)
+			eligible_points_list = list(eligible_points)
 
-		if len(eligible_points_list) == 0:
-			print "No eligible points for crossover"
-			print self.ToString()
-			print other_prog.ToString()
-			print "Tree1 candidates: %s" % list(set_tree1)
-			print "Tree2 candidates: %s" % list(set_tree2)
+			if len(eligible_points_list) == 0:
+				print "No eligible points for crossover"
+				print self.ToString()
+				print other_prog.ToString()
+				print "Tree1 candidates: %s" % list(set_tree1)
+				print "Tree2 candidates: %s" % list(set_tree2)
 			
-		xover_pt = None
-		# Create a strong bias (90%) for functions over leaves
-		while True:
-			xover_pt = random.choice(eligible_points_list)
-			
-			if not self.tree[xover_pt].IsTerminal():
-				if random.random() < 0.9:
-					break
-			else:
-				# Terminals
-				if random.random() <= 0.1:
-					break
+			# Create a strong bias (90%) for functions over leaves
+			while True:
+				xover_pt = random.choice(eligible_points_list)
+				
+				if not self.tree[xover_pt].IsTerminal():
+					if random.random() < 0.9:
+						break
+				else:
+					# Terminals
+					if random.random() <= 0.1:
+						break
 
 		# Temporary copy of this object's tree so that the other program gets
 		# nodes from the original (unmodified) tree
@@ -160,29 +177,30 @@ class Tree:
 			next_point = point_stack.pop()
 			# Stopping case: reading a '#'
 			if other_prog.tree[next_point] != '#':
-				if not other_prog.tree[next_point].IsTerminal() and (2*next_point+2) <= self.max_index:
+				next_pt_is_term = other_prog.tree[next_point].IsTerminal()
+				if (2*next_point+2) <= self.max_index and not next_pt_is_term:
 					self.tree[next_point] = other_prog.tree[next_point]
 					point_stack.append(2*next_point + 1)
 					point_stack.append(2*next_point + 2)
-				elif other_prog.tree[next_point].IsTerminal():
-					# Stopping case: terminal read
+				elif next_pt_is_term:
+					# Branch stopping case: terminal node
 					self.tree[next_point] = other_prog.tree[next_point]
 				else:
 					# Bad news: non-terminal read, but we're out of space in
 					# the tree.  Pick a random terminal and stop this branch.
 					self.tree[next_point] = random.choice(self.nodeset.GetTerminals())
 
-
 		point_stack = [xover_pt]
 		while len(point_stack) > 0:
 			next_point = point_stack.pop()
 			# Stopping case: reading a '#'
 			if temp_tree[next_point] != '#':
-				if not temp_tree[next_point].IsTerminal() and (2*next_point+2) <= self.max_index:
+				next_pt_is_term = temp_tree[next_point].IsTerminal()
+				if (2*next_point+2) <= self.max_index and not next_pt_is_term:
 					other_prog.tree[next_point] = temp_tree[next_point]
 					point_stack.append(2*next_point + 1)
 					point_stack.append(2*next_point + 2)
-				elif temp_tree[next_point].IsTerminal():
+				elif next_pt_is_term:
 					# Stopping case: terminal read
 					other_prog.tree[next_point] = temp_tree[next_point]
 				else:
