@@ -6,7 +6,7 @@ class RegressionProblem:
 		self.ev = eval_instance
 		self.ideal_fitness = 0.0
 		self.nodeset = RegressionNodes.RegressionNodes()
-		self.tree_depth = 2
+		self.tree_depth = 4
 	
 	def GetEvaluator(self):
 		return self.ev

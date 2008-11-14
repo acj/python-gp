@@ -8,8 +8,6 @@ class Tree:
 	def __init__(self, max_depth, nodeset):
 		"""We use a dictionary for storage in this representation"""
 		self.tree = []
-		#self.free_vars = free_vars
-		#self.select_vars = int(math.log(self.free_vars, 2))
 		self.max_depth = max_depth
 		self.max_index = int(math.pow(2, max_depth)) - 1
 		self.tree_is_invalid = False
@@ -108,27 +106,25 @@ class Tree:
 		out += "]"
 		return out
 	
-	def Mutate(self, num_mutations, mut_prob):
+	def Mutate(self):
 		"""Perform mutation on the tree according to the given
 		parameters (number of mutations and the probability that
 		mutation should occur."""
 
 		r = 0
-		for i in range(1, num_mutations+1):
-			if random.random() < mut_prob:
-				while True:
-					r = random.randint(0, len(self.tree)-1)
-					if self.tree[r] != '#':
-						# Do a sanity check on the arity of the node that we're
-						# replacing.
-						if self.tree[r].IsTerminal(): 
-							self.tree[r] = random.choice(self.nodeset.GetTerminals())
-						else:
-							# Preserve node arity
-							self.tree[r] = random.choice(self.nodeset.GetNodesByArity(self.tree[r].GetArity()))
+		while True:
+			r = random.randint(0, len(self.tree)-1)
+			if self.tree[r] != '#':
+				# Do a sanity check on the arity of the node that we're
+				# replacing.
+				if self.tree[r].IsTerminal(): 
+					self.tree[r] = random.choice(self.nodeset.GetTerminals())
+				else:
+					# Preserve node arity
+					self.tree[r] = random.choice(self.nodeset.GetNodesByArity(self.tree[r].GetArity()))
 
-						# Exit the loop - we mutated a node
-						break
+				# Exit the loop - we mutated a node
+				break
 
 	def CrossOver(self, other_prog, xover_pt=None):
 		"""Performs a crossover of this program with the another

@@ -13,8 +13,10 @@ class RegressionEvaluator(evaluation.Evaluator):
 		num_of_pts = 100
 		total_difference = 0.0	
 		curpt = -1.0
+		formula = None
 		for dx in range(0, num_of_pts + 1):
-			dx_difference = abs((curpt*curpt+curpt+1) - self.EvaluateProgramInstance(program, curpt))
+			formula = curpt*curpt+curpt+1
+			dx_difference = abs(formula - self.EvaluateProgramInstance(program, curpt))
 			if dx_difference == None:
 				print "Invalid tree detected!"
 			#print "|%f - %f| = %f" % (curpt*curpt+curpt+1, self.EvaluateProgramInstance(program, curpt), dx_difference)
