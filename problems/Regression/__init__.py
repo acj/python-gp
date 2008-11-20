@@ -1,3 +1,4 @@
+from CPPRegressionEvaluator import CPPRegressionEvaluator
 from RegressionEvaluator import RegressionEvaluator
 from RegressionNodes import RegressionNodes
 from RegressionProblem import RegressionProblem

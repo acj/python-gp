@@ -105,6 +105,16 @@ class Tree:
 				out += node.GetName() + ","
 		out += "]"
 		return out
+
+	def BriefPickle(self):
+		"""Return a string representation (pickled form) of ourselves"""
+		out = []
+		for node in self.tree:
+			if node != '#':
+				out.append(node.value)
+			else:
+				out.append('#')
+		return ''.join(out)
 	
 	def Mutate(self):
 		"""Perform mutation on the tree according to the given

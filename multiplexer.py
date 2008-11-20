@@ -4,9 +4,10 @@ import representation
 import problems
 import population
 
-ev = problems.Multiplexer.MultiplexerEvaluator()
+#ev = problems.Multiplexer.MultiplexerEvaluator()
+ev = problems.Multiplexer.CPPMuxEvaluator()
 problem = problems.Multiplexer.MultiplexerProblem(ev)
-pop = population.Population(1000, problem, 0.90, 0.05, 0.10, gp.RouletteWheelSelect, gp.RouletteWheelSelect, gp.RandomSelect)
+pop = population.Population(100, problem, 0.90, 0.05, 0.10, gp.RouletteWheelSelect, gp.RouletteWheelSelect, gp.RandomSelect)
 
 # Set up counters
 update_count = 0

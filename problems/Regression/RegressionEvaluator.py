@@ -68,7 +68,7 @@ class RegressionEvaluator(evaluation.Evaluator):
 				else:
 					return left_val/right_val
 			# Boolean-valued variables
-			elif node_value in ['-5.0','-4.0','-3.0','-2.0','-1.0','0.0','1.0','2.0','3.0','4.0','5.0']:
+			elif node_value in ['0','1','2']:
 				return float(node_value)
 			elif node_value == 'x':
 				return float(input_string)

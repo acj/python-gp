@@ -52,11 +52,7 @@ class RegressionNodes(representation.TreeNodeSet):
 	def __init__(self):
 		self.nodes = [PlusNode(), MinusNode(), MultiplyNode(), VariableNode(), 
 		#DivideNode(), 
-		#IntegerNode(-5.0),
-		#IntegerNode(-4.0), IntegerNode(-3.0), IntegerNode(-2.0),
-		IntegerNode(-1.0), IntegerNode(0.0), IntegerNode(1.0),
-		#IntegerNode(2.0), IntegerNode(3.0), IntegerNode(4.0),
-		#IntegerNode(5.0) ]
+		IntegerNode(0), IntegerNode(1), IntegerNode(2),
 		]
 
 	def GetNonterminals(self):

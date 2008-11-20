@@ -4,7 +4,8 @@ import representation
 import problems
 import population
 
-ev = problems.Regression.RegressionEvaluator()
+#ev = problems.Regression.RegressionEvaluator()
+ev = problems.Regression.CPPRegressionEvaluator()
 problem = problems.Regression.RegressionProblem(ev)
 pop = population.Population(100, problem, 0.90, 0.05, 0.10, gp.RouletteWheelSelect, gp.RouletteWheelSelect, gp.RouletteWheelSelect)
 

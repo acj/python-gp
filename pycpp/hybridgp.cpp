@@ -5,6 +5,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
+#include <cmath>
 #include <iostream>
 #include <string>
 
@@ -29,7 +30,78 @@ public:
 		expression = strdup(exp);
 	}
 
-	float evaluate()
+	float evaluate_regression()
+	{
+		size_t num_of_pts = 100;
+		float total_difference = 0.0;
+		float curpt = -1.0;
+
+		float dx_difference, expected;
+		for (size_t ndx=0; ndx<num_of_pts; ++ndx) {
+			expected = curpt*curpt+curpt+1;
+			dx_difference = fabs(expected - evaluate_regression_expression(0, curpt));
+			total_difference += dx_difference;
+			curpt += 2.0/num_of_pts;
+		}
+		return total_difference;
+	}
+
+	float evaluate_regression_expression(size_t i, float curpt)
+	{
+		if (expression[i] != '+' && expression[i] != '-' && expression[i] != '*' && expression[i] != '/' && expression[i] != 'x')
+		{
+			return (float)atoi(&expression[i]);
+		}
+		float leftvalue = 0.0;
+		float rightvalue = 0.0;
+
+		size_t current = (2 * i) + 1;
+		if (current < strlen(expression))
+			leftvalue = evaluate_regression_expression(current, curpt);
+
+		current = (2 * i) + 2;
+		if (current < strlen(expression))
+			rightvalue = evaluate_regression_expression(current, curpt);
+		
+		switch (expression[i])
+		{
+			case '+':
+			{
+				return leftvalue + rightvalue;
+			}
+
+			case '-':
+			{
+				return leftvalue - rightvalue;			
+			}
+
+			case '*':
+			{
+				return leftvalue * rightvalue;
+			}
+			
+			case '/':
+			{
+				if (rightvalue == 0.0) {
+					return 0.0;
+				} else {
+					return leftvalue / rightvalue;
+				}
+			}
+
+			case 'x':
+			{
+				return curpt;
+			}
+			default:
+			{
+				cout << "Fell to default switch case" << endl;
+				exit(1);
+			}
+		}
+	}
+
+	float evaluate_mux()
 	{
 		float total_correct = 0;
 		char input[6];
@@ -124,7 +196,8 @@ BOOST_PYTHON_MODULE(hybridgp)
     class_<EvalTree>("EvalTree")
         // Add a regular member function.
 		.def("set_expression", &EvalTree::set_expression)
-        .def("evaluate", &EvalTree::evaluate)
-        .def("evaluate_expression", &EvalTree::evaluate_expression)
+        .def("evaluate_mux", &EvalTree::evaluate_mux)
+        .def("evaluate_regression", &EvalTree::evaluate_regression)
+        //.def("evaluate_expression", &EvalTree::evaluate_expression)
         ;
 }

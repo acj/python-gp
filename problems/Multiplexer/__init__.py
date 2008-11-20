@@ -1,4 +1,4 @@
 from MultiplexerEvaluator import MultiplexerEvaluator
 from MultiplexerNodes import MultiplexerNodes
 from MultiplexerProblem import MultiplexerProblem
-#from CPPMuxEvaluator import CPPMuxEvaluator
+from CPPMuxEvaluator import CPPMuxEvaluator

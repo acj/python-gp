@@ -7,5 +7,5 @@ class CPPMuxEvaluator(evaluation.Evaluator):
 		self.evaltree = hybridgp.EvalTree()
 	
 	def Evaluate(self, program):
-		self.evaltree.set_expression(''.join(program.tree))
-		return self.evaltree.evaluate()
+		self.evaltree.set_expression(''.join(program.BriefPickle()))
+		return self.evaltree.evaluate_mux()
