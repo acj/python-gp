@@ -11,6 +11,8 @@ class Population:
 		self.average_fitness = 0.0
 		self.best_fitness = (-1, 0.50)
 		self.problem = problem
+		# Get an evaluator instance to use
+		self.evaluator = self.problem.GetEvaluator()
 		# Probabilities
 		self.xo_prob = xo_prob
 		self.repro_prob = repro_prob
@@ -28,8 +30,6 @@ class Population:
 				self.pop[idx].RaiseTree(True)
 			else:
 				self.pop[idx].RaiseTree(False)
-		# Get an evaluator instance to use
-		self.evaluator = self.problem.GetEvaluator()
 
 	def DoEvaluation(self):
 		for ndx in range(0, len(self.pop)):

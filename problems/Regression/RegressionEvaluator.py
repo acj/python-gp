@@ -15,6 +15,7 @@ class RegressionEvaluator(evaluation.Evaluator):
 		curpt = -1.0
 		formula = None
 		for dx in range(0, num_of_pts + 1):
+			# x^2 + x + 1
 			formula = curpt*curpt+curpt+1
 			dx_difference = abs(formula - self.EvaluateProgramInstance(program, curpt))
 			if dx_difference == None:
