@@ -50,18 +50,25 @@ public:
 	{
 		if (expression[i] != '+' && expression[i] != '-' && expression[i] != '*' && expression[i] != '/' && expression[i] != 'x')
 		{
-			return (float)atoi(&expression[i]);
+			char num_char[2];
+			num_char[0] = expression[i];
+			num_char[1] = '\0';
+			return (float)atoi(num_char);
 		}
 		float leftvalue = 0.0;
 		float rightvalue = 0.0;
 
 		size_t current = (2 * i) + 1;
 		if (current < strlen(expression))
+		{
 			leftvalue = evaluate_regression_expression(current, curpt);
+		}
 
 		current = (2 * i) + 2;
 		if (current < strlen(expression))
+		{
 			rightvalue = evaluate_regression_expression(current, curpt);
+		}
 		
 		switch (expression[i])
 		{
