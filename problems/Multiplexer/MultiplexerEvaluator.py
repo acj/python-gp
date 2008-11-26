@@ -118,27 +118,18 @@ class MultiplexerEvaluator(evaluation.Evaluator):
 			node_value = program.tree[index].GetValue()
 			# AND
 			if node_value == 'A':
-				if program.tree[2*index+1] == '#' or program.tree[2*index+2] == '#':
-					program.tree_is_invalid = True
-					return False
 				if self._SubEvaluate(program, input_string, 2*index+1) and self._SubEvaluate(program, input_string, 2*index+2):
 					return True
 				else:
 					return False
 			# OR
 			elif node_value == 'O':
-				if program.tree[2*index+1] == '#' or program.tree[2*index+2] == '#':
-					program.tree_is_invalid = True
-					return False
 				if self._SubEvaluate(program, input_string, 2*index+1) or self._SubEvaluate(program, input_string, 2*index+2):
 					return True
 				else:
 					return False
 			# NOT
 			elif node_value == 'N':
-				if program.tree[2*index+1] == '#':
-					program.tree_is_invalid = True
-					return False
 				if not self._SubEvaluate(program, input_string, 2*index+1):
 					return True
 				else:
