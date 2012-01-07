@@ -1,7 +1,7 @@
 Requirements
 ============
 * Python 2.3 (or higher)
-* Boost's [http://sourceforge.net/projects/boost/files/latest/download?source=files](bjam) (run	`bjam` from the	`pycpp` directory and copy hybridgp.so to the main directory)
+* Boost's [bjam](http://sourceforge.net/projects/boost/files/latest/download?source=files) (run	`bjam` from the	`pycpp` directory and copy hybridgp.so to the main directory)
 
 Usage
 =====
